@@ -1,48 +1,63 @@
-import pandas as pd
-import numpy as np
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import scipy as sci
+import numpy as np
+import math as m
+import pandas
 
 
-def gradient_descent(gradient, start, learn_rate: float, n_iter: int):
-    """
-    :param gradient: differential of function
-    """
-    slope = start
-    x_gradient = []
-    y_gradient = []
+def gradient_descent(start, learning_rate: float, n_iter: int):
+    x = start  # a starting point
+    x_values = []
+    y_values = []
+    primes = []
+    decrease_steps = []
     for i in range(n_iter):
-        diff = -learn_rate * Q_derivative(slope)
-        slope += diff
-        y_gradient.append(slope)
-        x_gradient.append(Q(slope))
-    return [y_gradient, x_gradient]
+        # inspecting slope of x
+        prime = q_prime(x)
+        primes.append(prime)
+
+        # getting new step to decrease in x values
+        decrease_step = learning_rate * prime
+        decrease_steps.append(decrease_step)
+
+        x_values.append(x)
+        y_values.append(q(x))
+
+        # Set new step for next iteration of x
+        x += decrease_step
+    return [primes, decrease_steps, x_values, y_values]
 
 
-def Q(x):
+def q(x):
     return ((x + 3) ** 2) * (1 - x)
 
 
-def Q_derivative(x):
-    return -((3 * x) ** 2) - 10 * x - 3
+def q_prime(x):
+    return -m.pow((3 * x), 2) - (10 * x) - 3
 
 
-def parabola(x):
-    return x ** 2
+def plot_q():
+    start, end = -4, 1
+    plt.plot(
+        [i for i in range(start, end)],
+        [q(i) for i in range(start, end)])
 
 
-start = -4
-end = 1
-plt.plot(
-    [i for i in range(start, end)],
-    [Q(i) for i in range(start, end)])
+start = -1
+learning_rate = 0.1
+n_iter = 4
 
-# plot gradient descent
-derivative = lambda v: -(3 * (v ** 2)) - (10 * v) - 3
-[x_grad, y_grad] = gradient_descent(gradient=derivative, start=-1, learn_rate=0.5, n_iter=3)
-plt.scatter(x_grad, y_grad)  # gradient descent plot
+print(f"start: {start}\nlearning rate: {learning_rate}\niterations: {n_iter}")
+
+[slopes, descents, x, y] = gradient_descent(start=start, learning_rate=learning_rate, n_iter=n_iter)
+
+frame = np.array([slopes, descents, x, y])
+frame = frame.reshape((len(x), 4))
+# plot
+plt.clf()
+plt.close()
+plt.scatter(x, y)  # gradient descent plot
+plot_q()
 plt.show()
 
-# print(y_grad)
-# print(x_grad)
+pandaview = pandas.DataFrame(frame, columns=["Slope", "Decrease", "x", "y"])
+print(pandaview)
