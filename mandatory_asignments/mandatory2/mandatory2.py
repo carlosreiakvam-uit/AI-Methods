@@ -1,5 +1,4 @@
 from math import fsum, sqrt
-
 import pandas as pd
 
 # Iris data link
