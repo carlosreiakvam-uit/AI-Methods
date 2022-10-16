@@ -13,28 +13,28 @@ class Features:
 
 
 class Chromosome:
-    def __init__(self, chromo_id):
-        self.id = chromo_id
-        self.it = 870  # Ideal thrust: 870N
+    def __init__(self, chromosome_id):
+        self.id: int = chromosome_id
+        self.it: float = 870.0  # Ideal thrust: 870N
         self.ftr = Features()
+        self.thrust: float = 0.0
         self.fitness_val = float('inf')
+        self.mv = self.get_mapped()
 
     def get_mapped(self):
         return {'a': int(self.ftr.a, 2),
                 'b': int(self.ftr.b, 2),
-                'y': int(self.ftr.y, 2),
+                'y': int(self.ftr.y, 2) * 0.01,
                 'd': int(self.ftr.d, 2),
-                't': int(self.ftr.y, 2)}
+                't': int(self.ftr.y, 2) * 0.01}
 
-    def get_thrust(self):
-        mv = self.get_mapped()
-        return (m.pow(mv['a'], mv['b']) + m.log(mv['y'])) / (mv['d'] + m.pow(mv['t'], 3))
+    def set_thrust(self):
+        mv = self.mv
+        self.thrust = (m.pow(mv['a'], mv['b']) + m.log(mv['y'])) / (mv['d'] + m.pow(mv['t'], 3))
 
     def set_fitness(self):
-        self.fitness_val = 1 / (self.it - self.get_thrust())
-
-    def get_fitness(self):
-        return self.fitness_val
+        self.set_thrust()
+        self.fitness_val = 1 / (self.it - self.thrust)
 
     def crossover(self, other):
         pass
@@ -42,15 +42,15 @@ class Chromosome:
 
     def mutate(self):
         pass
-        # mutate features to avoid getting studck in local mimima
+        # mutate features to avoid getting stuck in local mimima
 
     def __str__(self):
-        mv = self.get_mapped()
+        mv = self.mv
         return str(f'Chromosome {self.id}\n'
                    f"a:{mv['a']}\n"
                    f"b:{mv['b']}\n"
                    f"y:{mv['y']}\n"
                    f"d:{mv['d']}\n"
                    f"t:{mv['t']}\n"
-                   f'thrust: {self.get_thrust()}\n'
+                   f'thrust: {self.thrust}\n'
                    f'fitness: {self.fitness_val}\n')
