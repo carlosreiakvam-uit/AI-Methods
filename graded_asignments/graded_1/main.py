@@ -13,12 +13,19 @@ if __name__ == '__main__':
     # print(c.get_fitness())
 
     population = []
-    pop_size = 10
+    pop_size = 100
     for i in range(pop_size):
-        population.append(Chromosome(i))
-
-    for p in population:
-        p.set_fitness()
-
+        new_individual = Chromosome(i)
+        new_individual.set_fitness()
+        population.append(new_individual)
     for p in population:
         print(p)
+
+    population.sort(key=lambda x: x.fitness_val, reverse=True)
+
+    for j in range(1, 21):
+        new_offspring: Chromosome = population[j - 1].crossover(population[j + 1])
+        print(new_offspring)
+        new_offspring.mutate()
+        population[len(population) - j] = new_offspring  # replace least fit individual
+

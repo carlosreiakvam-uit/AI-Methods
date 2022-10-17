@@ -33,11 +33,15 @@ class Chromosome:
         self.thrust = (m.pow(mv['a'], mv['b']) + m.log(mv['y'])) / (mv['d'] + m.pow(mv['t'], 3))
 
     def set_fitness(self):
-        self.set_thrust()
-        self.fitness_val = 1 / (self.it - self.thrust)
+        # self.set_thrust()
+        self.thrust = 200
+        if self.thrust != self.it:
+            self.fitness_val = 1 / (self.it - self.thrust)
+        else:
+            self.fitness_val = 1.00
 
     def crossover(self, other):
-        pass
+        return self
         # crossbreed using multi point cross breeding of two individuals
 
     def mutate(self):
