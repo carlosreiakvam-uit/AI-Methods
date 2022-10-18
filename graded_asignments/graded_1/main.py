@@ -1,31 +1,25 @@
 from graded_asignments.graded_1.Chromosome import Chromosome
 
 if __name__ == '__main__':
-    # c = Chromosome()
-    # a = c.fitness(c.a, c.b, c.y, c.d, c.t)
-    # a = int(c.a, 2)
-    # b = int(c.b, 2)
-    # y = int(c.y, 2)
-    # d = int(c.y, 2)
-    # t = int(c.t, 2)
-    # print(c.get_fitness())
-    # a = c.fitness(c.a, c.b, c.y, c.d, c.t)
-    # print(c.get_fitness())
-
     population = []
     pop_size = 100
+
+    # create initial population
     for i in range(pop_size):
-        new_individual = Chromosome(i)
+        new_individual = Chromosome()
+        new_individual.set_random_features()
         new_individual.set_fitness()
         population.append(new_individual)
-    for p in population:
-        print(p)
 
+    # sort population from best to worst
     population.sort(key=lambda x: x.fitness_val, reverse=True)
 
-    for j in range(1, 21):
-        new_offspring: Chromosome = population[j - 1].crossover(population[j + 1])
+    # crossbreed population and create new offspring
+    for j in range(1, pop_size - 1):
+        crossover_features = population[j - 1].multi_point_crossover(population[j + 1])
+        new_offspring = Chromosome(init_features=crossover_features)
+        new_offspring.set_fitness()
         print(new_offspring)
-        new_offspring.mutate()
-        population[len(population) - j] = new_offspring  # replace least fit individual
-
+        # new_offspring.mutate()
+        # population[len(population) - j] = new_offspring  # replace least fit individual
+    # print("finito")
