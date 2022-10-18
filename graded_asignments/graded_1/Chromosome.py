@@ -1,5 +1,5 @@
 import random
-from random import choice, randint, sample
+from random import choice, randint, sample, randrange
 import math as m
 import numpy as np
 
@@ -85,27 +85,49 @@ class Chromosome:
         bin_val: bin = ''.join(format(ord(i), '08b') for i in bin_str)
         return bin_val
 
-    def multi_point_crossover(self, other) -> dict:
-        offspring_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        for key in self.feature_keys:
-            new_f = ''
-            a = self.features[key]['val']
-            b = other.features[key]['val']
-            for i in range(len(a)):
-                if bool(random.getrandbits(1)):
-                    new_f += a[i]
-                else:
-                    new_f += b[i]
-            offspring_features[key] = new_f
-        return offspring_features
+    def uniform_crossover(self, other) -> dict:
+        uniform_pattern = np.random.randint(0, 2, self.n_features)
+        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+        for i, k in enumerate(self.feature_keys):
+            if bool(uniform_pattern[i]):
+                new_features[k] = self.features[k]
+            else:
+                new_features[k] = other.features[k]
+        return new_features
 
+        # offspring_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+
+    # for key in self.feature_keys:
+    #     new_f = ''
+    #     a = self.features[key]['val']
+    #     b = other.features[key]['val']
+    #     for i in range(len(a)):
+    #         if bool(random.getrandbits(1)):
+    #             new_f += a[i]
+    #         else:
+    #             new_f += b[i]
+    #     offspring_features[key] = new_f
+    # return offspring_features
+
+    # noinspection PyUnboundLocalVariable
     def mutate(self):
-        pass
-        # mutate features to avoid getting stuck in local mimima
+        for k, v in self.features.items():
+            bin_val = ''
+            v: list = list(self.features[k]['val'])
+            for i, digit in enumerate(v):
+                if random.random() > 0.5:
+                    if digit == '0':
+                        v[i] = '1'
+                    elif digit == '1':
+                        v[i] = '0'
+            # back to string
+            for i in v:
+                bin_val = bin_val + i
+            self.features[k]['val'] = bin_val
 
     def __str__(self):
         mv = self.get_mapped(round_decimals=True)
-        return str(f'thrust: {round(self.thrust, 2)}\t\t'
+        return str(f'thrust: {round(self.thrust, 3)}\t\t'
                    f'fit: {round(self.fitness_val, 6)}\t'
                    f"a:{mv['a']}, "
                    f"b:{mv['b']}, "
