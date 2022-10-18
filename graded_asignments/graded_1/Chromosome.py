@@ -7,8 +7,8 @@ from constants import *
 
 class Chromosome:
 
-    def __init__(self, init_features=None):
-        self.it: float = 870.0  # Ideal thrust: 870N
+    def __init__(self, init_features=None, thrust_value=870.0):
+        self.it: float = thrust_value
         self.thrust: float = 0.0
         self.fitness_val = float('inf')
         self.feature_keys = ['a', 'b', 'y', 'd', 't']
@@ -20,11 +20,11 @@ class Chromosome:
             'a': {'val': None, 'min': 0, 'max': 45},
             # n blades
             'b': {'val': None, 'min': 2, 'max': 5},
-            # air/fuel ratio, represented by * 0.01
+            # air/fuel ratio, represented by  y * 0.01
             'y': {'val': None, 'min': 55, 'max': 75},
             # propeller diameter
             'd': {'val': None, 'min': 1000, 'max': 2000},
-            # idle valve position theta, represented by * -2.01
+            # idle valve position theta, represented by t * 0.1
             't': {'val': None, 'min': 5, 'max': 50}
         }
         if init_features is not None:
@@ -105,9 +105,13 @@ class Chromosome:
         return new_features
 
     # noinspection PyUnboundLocalVariable
-    def mutate(self):
-        for k, v in self.features.items():
-            bin_val = ''
+    def mutate(self) -> None:
+        """
+        each features bit-values have a 50% chance of being mutated
+        :return:None
+        """
+        for k, _ in self.features.items():
+            #  v : list of bit-values for given feature
             v: list = list(self.features[k]['val'])
             for i, digit in enumerate(v):
                 if random.random() > 0.5:
@@ -115,9 +119,13 @@ class Chromosome:
                         v[i] = '1'
                     elif digit == '1':
                         v[i] = '0'
-            # back to string
+
+            # transform list v to a string representing binary value
+            bin_val = ''
             for i in v:
                 bin_val = bin_val + i
+
+            # set feature value to that of binary string value
             self.features[k]['val'] = bin_val
 
     def __str__(self):
