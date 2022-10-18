@@ -4,14 +4,14 @@ from constants import *
 
 
 class GA:
-    def __init__(self):
+    def __init__(self, pop_size, mutate_treshold, epochs, selection_scheme, crossover_type):
         self.population = []
         # settings
-        self.pop_size = 40
-        self.mutate_threshold = 0.2
-        self.epochs = 100
-        self.selection_scheme = ELITISM
-        self.crossover_type = UNIFORM
+        self.pop_size = pop_size
+        self.mutate_threshold = mutate_treshold
+        self.epochs = epochs
+        self.selection_scheme = selection_scheme
+        self.crossover_type = crossover_type
 
         self.create_initial_population()
 
@@ -26,7 +26,8 @@ class GA:
         # sort population from best to worst
         self.population.sort(key=lambda x: x.fitness_val, reverse=True)
 
-    def crossbreed(self):
+    def crossbreed(self, print_along=False):
+        print("crossbreeding")
         for i in range(self.epochs):
             for j in range(1, self.pop_size - 1):
                 ind_1 = self.population[j - 1]
@@ -43,6 +44,8 @@ class GA:
             self.population.sort(key=lambda x: x.fitness_val, reverse=True)
             if i % 1000 / self.epochs == 0:
                 print('.', end='')
+            if print_along:
+                print(self.population[0])
 
     def check_mutate_threshold(self, rate):
         return random.random() < rate
@@ -55,5 +58,3 @@ class GA:
             print(p)
             if i == head:
                 break
-
-
