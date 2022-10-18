@@ -2,6 +2,7 @@ import random
 from random import choice, randint, sample, randrange
 import math as m
 import numpy as np
+from constants import *
 
 
 class Chromosome:
@@ -85,33 +86,23 @@ class Chromosome:
         bin_val: bin = ''.join(format(ord(i), '08b') for i in bin_str)
         return bin_val
 
-    def uniform_crossover(self, other) -> dict:
-        uniform_pattern = np.random.randint(0, 2, self.n_features)
+    def crossover(self, other, crossover_type) -> dict:
+        if crossover_type == ARITHMETIC:
+            crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
+        elif crossover_type == SINGLE_POINT:
+            crossbreed_pattern = [0, 0, 0, 1, 1]
+        elif crossover_type == MULTI_POINT:  # MULTI
+            crossbreed_pattern = [0, 1, 0, 1, 1]
+        else:  # uniform
+            crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
+
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
         for i, k in enumerate(self.feature_keys):
-            if bool(uniform_pattern[i]):
+            if bool(crossbreed_pattern[i]):
                 new_features[k] = self.features[k]['val']
             else:
                 new_features[k] = other.features[k]['val']
         return new_features
-
-    def arithmetic_crossover(self, other) -> dict:
-        pass
-
-    def single_point_crossover(self, other) -> dict:
-        pass
-
-    def multi_point_crossover(self, other) -> dict:
-        # TODO: this is now uniform. change it.
-        uniform_pattern = np.random.randint(0, 2, self.n_features)
-        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        for i, k in enumerate(self.feature_keys):
-            if bool(uniform_pattern[i]):
-                new_features[k] = self.features[k]['val']
-            else:
-                new_features[k] = other.features[k]['val']
-        return new_features
-
 
     # noinspection PyUnboundLocalVariable
     def mutate(self):
