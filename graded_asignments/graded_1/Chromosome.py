@@ -90,24 +90,28 @@ class Chromosome:
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
         for i, k in enumerate(self.feature_keys):
             if bool(uniform_pattern[i]):
-                new_features[k] = self.features[k]
+                new_features[k] = self.features[k]['val']
             else:
-                new_features[k] = other.features[k]
+                new_features[k] = other.features[k]['val']
         return new_features
 
-        # offspring_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+    def arithmetic_crossover(self, other) -> dict:
+        pass
 
-    # for key in self.feature_keys:
-    #     new_f = ''
-    #     a = self.features[key]['val']
-    #     b = other.features[key]['val']
-    #     for i in range(len(a)):
-    #         if bool(random.getrandbits(1)):
-    #             new_f += a[i]
-    #         else:
-    #             new_f += b[i]
-    #     offspring_features[key] = new_f
-    # return offspring_features
+    def single_point_crossover(self, other) -> dict:
+        pass
+
+    def multi_point_crossover(self, other) -> dict:
+        # TODO: this is now uniform. change it.
+        uniform_pattern = np.random.randint(0, 2, self.n_features)
+        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+        for i, k in enumerate(self.feature_keys):
+            if bool(uniform_pattern[i]):
+                new_features[k] = self.features[k]['val']
+            else:
+                new_features[k] = other.features[k]['val']
+        return new_features
+
 
     # noinspection PyUnboundLocalVariable
     def mutate(self):
@@ -127,8 +131,8 @@ class Chromosome:
 
     def __str__(self):
         mv = self.get_mapped(round_decimals=True)
-        return str(f'thrust: {round(self.thrust, 3)}\t\t'
-                   f'fit: {round(self.fitness_val, 6)}\t'
+        return str(f'thrust: {self.thrust}\t\t'
+                   f'fit: {self.fitness_val}\t'
                    f"a:{mv['a']}, "
                    f"b:{mv['b']}, "
                    f"y:{mv['y']}, "
