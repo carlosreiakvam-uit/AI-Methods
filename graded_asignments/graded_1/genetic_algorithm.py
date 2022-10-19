@@ -68,42 +68,57 @@ class GA:
         if print_along:
             print(self.population[0])
 
-    def arithmetic_crossover(self, ind1, ind2):
+    def arithmetic_crossover(self, parent1, parent2):
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        for i, k in enumerate(self.feature_keys):
-            f1_int = int(ind1.features[k]['val'], 2)
-            f2_int = int(ind2.features[k]['val'], 2)
+        for _, k in enumerate(self.feature_keys):
+            f1_int = int(parent1.features[k]['val'], 2)
+            f2_int = int(parent2.features[k]['val'], 2)
             mean = int((f1_int + f2_int) / 2)
             new_features[k] = format(mean, 'b')
         return new_features
 
-    def crossover(self, ind1: Chromosome, ind2: Chromosome, crossover_type) -> dict:
+
+    def multipoint_crossover(self, parent1, parent2):
+        # TODO: This implementation is biased towards changing first bits
+        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+        random_treshold = 0.9
+        for _, k in enumerate(self.feature_keys):
+            if random.random() < random_treshold:
+                new_features[k] = parent1.features[k]['val']
+                random_treshold -= 0.1  # lower chance of new occurence by 10%
+            else:
+                new_features[k] = parent2.features[k]['val']
+        return new_features
+
+    def crossover(self, parent1: Chromosome, parent2: Chromosome, crossover_type) -> dict:
+        # TODO: Change this
         """
-        - **Crossing two chromosome by using a crossbreed-pattern**.\n
+        -
         - The crossbreed-pattern consists of 0's and 1's.\n
         - For a list of bits representing a feature value:\n
           - if crossbreed pattern = 0: use first chromosome's bit \n
           - if crossbreed pattern = 1: use second chromosome's bit\n
-        :param ind1: parent 1 Chromosome
-        :param ind2: parent 2 Chromosome
+        :param parent1: parent 1 Chromosome
+        :param parent2: parent 2 Chromosome
         :param crossover_type: 0= Arithmetic crossover, 1 = single point crossover, 2 = multi point crossover, 3 = uniform crossover
         :return:
         """
         if crossover_type == ARITHMETIC:
-            return self.arithmetic_crossover(ind1, ind2)
+            return self.arithmetic_crossover(parent1, parent2)
         elif crossover_type == SINGLE_POINT:
             crossbreed_pattern = [0, 0, 0, 1, 1]
         elif crossover_type == MULTI_POINT:
-            crossbreed_pattern = [0, 1, 0, 1, 1]
+            return self.multipoint_crossover(parent1, parent2)
+
         else:  # UNIFORM
             crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
 
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
         for i, k in enumerate(self.feature_keys):
             if bool(crossbreed_pattern[i]):
-                new_features[k] = ind1.features[k]['val']
+                new_features[k] = parent1.features[k]['val']
             else:
-                new_features[k] = ind2.features[k]['val']
+                new_features[k] = parent2.features[k]['val']
         return new_features
 
     def elitism(self):
