@@ -6,8 +6,9 @@ from constants import *
 
 class GA:
     def __init__(self, pop_size, mutate_treshold, generations, selection_scheme,
-                 crossover_type, n_elites=None, thrust_value=870):
+                 crossover_type, n_elites=None, thrust_value=870, low_level_mutation=True):
 
+        self.low_level_mutation = low_level_mutation
         self.population = []
         self.feature_keys = ['a', 'b', 'y', 'd', 't']
         self.n_features = 5
@@ -55,15 +56,16 @@ class GA:
 
                 # MUTATION
                 if random.random() < self.mutate_threshold:
-                    ind_offspring.mutate()
+                    if self.low_level_mutation:
+                        ind_offspring.low_level_mutation()
+                    else:
+                        ind_offspring.high_level_mutation()
 
                 # REPLACEMENT
                 self.population[len(self.population) - j] = ind_offspring  # replace least fit individual
 
                 # sort population
                 self.population.sort(key=lambda x: x.fitness_val)
-
-            self.print_loading_dots(i)
 
         if print_along:
             print(self.population[0])
@@ -77,27 +79,34 @@ class GA:
             new_features[k] = format(mean, 'b')
         return new_features
 
-
     def multipoint_crossover(self, parent1, parent2):
-        # TODO: This implementation is biased towards changing first bits
+        n_ones = random.randrange(1, self.n_features)
+        ones = np.ones(n_ones, dtype=np.int8).tolist()
+        zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
+        pattern = ones + zeros
+        random.shuffle(pattern)
+        return pattern
+
+    def singlepoint_crossover(self, parent1, parent2):
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        random_treshold = 0.9
-        for _, k in enumerate(self.feature_keys):
-            if random.random() < random_treshold:
+        n_ones = random.randint(self.n_features)
+        ones = np.ones(n_ones, dtype=np.int8).tolist()
+        zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
+        pattern = ones + zeros
+        random.shuffle(pattern)
+        return pattern
+
+    def generate_features_from_crossover_pattern(self, pattern, parent1, parent2):
+        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+        for i, k in enumerate(self.feature_keys):
+            if pattern[i] == 0:
                 new_features[k] = parent1.features[k]['val']
-                random_treshold -= 0.1  # lower chance of new occurence by 10%
             else:
                 new_features[k] = parent2.features[k]['val']
         return new_features
 
     def crossover(self, parent1: Chromosome, parent2: Chromosome, crossover_type) -> dict:
-        # TODO: Change this
         """
-        -
-        - The crossbreed-pattern consists of 0's and 1's.\n
-        - For a list of bits representing a feature value:\n
-          - if crossbreed pattern = 0: use first chromosome's bit \n
-          - if crossbreed pattern = 1: use second chromosome's bit\n
         :param parent1: parent 1 Chromosome
         :param parent2: parent 2 Chromosome
         :param crossover_type: 0= Arithmetic crossover, 1 = single point crossover, 2 = multi point crossover, 3 = uniform crossover
@@ -106,29 +115,23 @@ class GA:
         if crossover_type == ARITHMETIC:
             return self.arithmetic_crossover(parent1, parent2)
         elif crossover_type == SINGLE_POINT:
-            crossbreed_pattern = [0, 0, 0, 1, 1]
+            pattern = self.singlepoint_crossover(parent1, parent2)
+            return self.generate_features_from_crossover_pattern(pattern, parent1, parent2)
         elif crossover_type == MULTI_POINT:
-            return self.multipoint_crossover(parent1, parent2)
-
+            pattern = self.multipoint_crossover(parent1, parent2)
+            return self.generate_features_from_crossover_pattern(pattern, parent1, parent2)
         else:  # UNIFORM
-            crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
-
-        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        for i, k in enumerate(self.feature_keys):
-            if bool(crossbreed_pattern[i]):
-                new_features[k] = parent1.features[k]['val']
-            else:
-                new_features[k] = parent2.features[k]['val']
-        return new_features
-
-    def elitism(self):
-        pass
+            pattern = list(np.random.randint(0, 2, self.n_features))
+            return self.generate_features_from_crossover_pattern(pattern, parent1, parent2)
 
     def roulette(self):
         best_fitness = self.population[0].fitness_val  # closest to 0
         worst_fitness = self.population[-1].fitness_val  # furthest from 0
         sum_fitness = 0
-        random_roulette_n = random.randrange(int(best_fitness), int(worst_fitness))
+        try:
+            random_roulette_n = random.randrange(int(best_fitness), int(worst_fitness))
+        except ValueError:
+            random_roulette_n = random.randrange(0, 1)
         for p in self.population:
             sum_fitness += p.fitness_val
             if sum_fitness > random_roulette_n:
@@ -143,9 +146,3 @@ class GA:
             print(p)
             if i == head:
                 break
-
-    def print_loading_dots(self, i):
-        if i % 2000 == 1900:
-            print()
-        elif i % (int(self.generations / 200)) == 0:
-            print('.', end='')

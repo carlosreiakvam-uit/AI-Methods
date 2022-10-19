@@ -114,19 +114,22 @@ class Chromosome:
         # calculate fitness. Closer to 0 is better
         self.fitness_val = abs(self.perfect_thrust - self.thrust)
 
-    def mutate(self) -> None:
+    def high_level_mutation(self) -> None:
+        pass
+
+    def low_level_mutation(self) -> None:
         """
         - each features bit-values have a 50% chance of being mutated
         :return:None
         """
         for k, _ in self.features.items():
-
-            #  v is a list of bit-values for the given feature
+            #  v is a list representation of bit-values for feature with key k
             v: list = list(self.features[k]['val'])
+            bit_length = len(v)
 
-            # mutate digit if random gives a value over 0.5
             for i, digit in enumerate(v):
-                if random.random() > 0.5:
+                if random.random() < 1 / bit_length:
+                    # bit-flip
                     if digit == '0':
                         v[i] = '1'
                     elif digit == '1':

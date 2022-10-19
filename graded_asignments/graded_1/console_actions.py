@@ -47,18 +47,18 @@ def get_user_input():
 
 def demo_parameters() -> dict:
     print("\npopulation size:\t\t100")
-    print("mutation rate:\t\t\t0.2")
-    print("n generations:\t\t\t1000")
-    print("selection scheme:\t\telitism")
+    print("mutation rate:\t\t\t0.03")
+    print("n generations:\t\t\t500")
+    print("selection scheme:\t\roulette")
     print("n elites:\t\t\t\t90")
     print("crossover type:\t\t\tmulti-point")
     print("seeking thrust value:\t870")
     print("\nRunning demo algorithm...", end='')
 
     return {'pop_size': 100,
-            'mutation_threshold': 0.2,
-            'generations': 20000,
+            'mutation_threshold': 0.03,
+            'generations': 500,
             'selection_scheme': ROULETTE,
             'crossover_type': MULTI_POINT,
-            'n_elites': 90,
+            'n_elites': 50,
             'thrust_value': 870}
