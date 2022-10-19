@@ -6,27 +6,30 @@ from constants import *
 
 
 class Chromosome:
+    """
+        **Features:**\n
+        - a: blade angel between 0 and 45\n
+        - b: n blades between 2 and 5\n
+        - y: air/fuel ratio between 0.55 and 0.75\n
+        - d: propeller diameter between 1000 and 2000\n
+        - t: idle valve position theta between 0.5 and 55\n
+    """
 
     def __init__(self, init_features=None, thrust_value=870.0):
         self.perfect_thrust: float = thrust_value
         self.thrust: float = 0.0
-        self.fitness_val = float('inf')
+        self.fitness_val = float('-inf')
         self.feature_keys = ['a', 'b', 'y', 'd', 't']
         self.n_features = 5
 
-        # init features to min value
         self.features = {
-            # blade angel
             'a': {'val': None, 'min': 0, 'max': 45},
-            # n blades
             'b': {'val': None, 'min': 2, 'max': 5},
-            # air/fuel ratio, represented by  y * 0.01
             'y': {'val': None, 'min': 55, 'max': 75},
-            # propeller diameter
             'd': {'val': None, 'min': 1000, 'max': 2000},
-            # idle valve position theta, represented by t * 0.1
             't': {'val': None, 'min': 5, 'max': 50}
         }
+
         if init_features is not None:
             self.set_all_features(init_features)
         else:
@@ -115,6 +118,7 @@ class Chromosome:
         else:
             self.fitness_val = 1 / delta_thrust  # lower delta thrust gives higher fitness value
 
+    # TODO: Move over to genetic algorithm class
     def crossover(self, other, crossover_type) -> dict:
         """
         - **Crossing two chromosome by using a crossbreed-pattern**.\n
@@ -144,6 +148,7 @@ class Chromosome:
         return new_features
 
     # noinspection PyUnboundLocalVariable
+    # TODO: Move over to genetic algorithm class
     def mutate(self) -> None:
         """
         - each features bit-values have a 50% chance of being mutated

@@ -20,4 +20,5 @@ if __name__ == '__main__':
             ga.crossbreed()
             print("\n\nRESULTS")
             print(ga.population[0])
+            print("\n(enter to continue)", end='')
             input()

@@ -14,7 +14,7 @@ exit...........3""")
         return 0
 
     if inp == 1:
-        inp = use_standard_inputs()
+        inp = demo_parameters()
     elif inp == 2:
         inp = get_user_input()
     elif inp == 3:
@@ -36,8 +36,6 @@ def get_user_input():
         generations = int(input())
     print("optimize for thrust value:", end=' ')
     thrust_value = int(input())
-    # print("average population fitness:", end=' ')
-    # avg_pop_fit = int(input())
     return {'pop_size': 100,
             'mutation_threshold': mutation_rate,
             'generations': generations,
@@ -47,19 +45,19 @@ def get_user_input():
             'thrust_value': thrust_value}
 
 
-def use_standard_inputs() -> dict:
+def demo_parameters() -> dict:
     print("\npopulation size:\t\t100")
     print("mutation rate:\t\t\t0.2")
-    print("n generations:\t\t\t10000")
+    print("n generations:\t\t\t1000")
     print("selection scheme:\t\telitism")
     print("n elitist gens:\t\t\t90")
     print("crossover type:\t\t\tmulti point")
     print("seeking thrust value:\t870")
-    print("\nrunning demo algorithm...", end='')
+    print("\nRunning demo algorithm...", end='')
 
     return {'pop_size': 100,
             'mutation_threshold': 0.2,
-            'generations': 9999,
+            'generations': 1000,
             'selection_scheme': ELITISM,
             'crossover_type': MULTI_POINT,
             'n_elitism_rounds': 90,
