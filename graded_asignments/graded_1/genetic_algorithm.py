@@ -32,7 +32,41 @@ class GA:
     def create_initial_population(self):
         for i in range(self.pop_size):
             self.population.append(Chromosome(thrust_value=self.thrust_value))
-        self.population.sort(key=lambda x: x.fitness_val, reverse=True)  # sort population from best to worst
+        self.population.sort(key=lambda x: x.fitness_val)  # sort population from best to worst
+
+    # noinspection PyUnboundLocalVariable
+    def crossbreed(self, print_along=False):
+        for i in range(self.generations):
+
+            # iterate over population
+            for j in range(1, self.n_elites):
+
+                # SELECTION
+                if self.selection_scheme == ROULETTE:
+                    parent_1 = self.roulette()
+                    parent_2 = self.roulette()
+                elif self.selection_scheme == ELITISM:
+                    parent_1 = self.population[j - 1]
+                    parent_2 = self.population[j + 1]
+
+                # CROSSBREEDING
+                crossover_features = self.crossover(parent_1, parent_2, crossover_type=self.crossover_type)
+                ind_offspring = Chromosome(init_features=crossover_features, thrust_value=self.thrust_value)
+
+                # MUTATION
+                if random.random() < self.mutate_threshold:
+                    ind_offspring.mutate()
+
+                # REPLACEMENT
+                self.population[len(self.population) - j] = ind_offspring  # replace least fit individual
+
+                # sort population
+                self.population.sort(key=lambda x: x.fitness_val)
+
+            self.print_loading_dots(i)
+
+        if print_along:
+            print(self.population[0])
 
     def arithmetic_crossover(self, ind1, ind2):
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
@@ -76,53 +110,15 @@ class GA:
         pass
 
     def roulette(self):
-        lowest_fitness = 1 / self.population[-1].fitness_val
-        highest_fitness = 1 / self.population[0].fitness_val
+        best_fitness = self.population[0].fitness_val  # closest to 0
+        worst_fitness = self.population[-1].fitness_val  # furthest from 0
         sum_fitness = 0
+        random_roulette_n = random.randrange(int(best_fitness), int(worst_fitness))
         for p in self.population:
-            sum_fitness += 1 / p.fitness_val
-        # fitness_invert = 1/sum_fitness
-        print(sum_fitness)
-
-        # for i in range(int(self.pop_size * 0.2)):
-        #     ind_copy = self.population[i]
-        #     self.population.append(ind_copy)
-        #     if i > 1000:
-        #         print("weehow")
-        #         break  # safety brake
-        # random.shuffle(self.population)
-
-    def crossbreed(self, print_along=False):
-        for i in range(self.generations):
-
-            population_range = self.n_elites  # TODO: denne er fast nå...
-            # if self.selection_scheme == ROULETTE:
-            #     self.roulette()
-            # population_range = self.n_elites
-            # elif self.selection_scheme == ELITISM:
-            #     population_range = self.n_elites
-
-            # Crossbreed
-            for j in range(1, population_range):
-                ind_1 = self.population[j - 1]
-                ind_2 = self.population[j + 1]
-                crossover_features = self.crossover(ind_1, ind_2, crossover_type=self.crossover_type)
-                ind_offspring = Chromosome(init_features=crossover_features, thrust_value=self.thrust_value)
-
-                # mutate by chance
-                if random.random() < self.mutate_threshold:
-                    ind_offspring.mutate()
-
-                # replace least fit individual
-                self.population[len(self.population) - j] = ind_offspring  # replace least fit individual
-
-                # sort population
-                self.population.sort(key=lambda x: x.fitness_val, reverse=True)
-
-            self.print_loading_dots(i)
-
-        if print_along:
-            print(self.population[0])
+            sum_fitness += p.fitness_val
+            if sum_fitness > random_roulette_n:
+                return p
+        return self.population[0]  # failsafe return
 
     def print_population(self, head: float('inf')):
         print("\n\nPOPULATION")

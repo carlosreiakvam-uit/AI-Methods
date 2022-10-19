@@ -51,14 +51,14 @@ def demo_parameters() -> dict:
     print("n generations:\t\t\t1000")
     print("selection scheme:\t\telitism")
     print("n elites:\t\t\t\t90")
-    print("crossover type:\t\t\tarithmetic")
+    print("crossover type:\t\t\tmulti-point")
     print("seeking thrust value:\t870")
     print("\nRunning demo algorithm...", end='')
 
     return {'pop_size': 100,
             'mutation_threshold': 0.2,
-            'generations': 10000,
-            'selection_scheme': ELITISM,
-            'crossover_type': ARITHMETIC,
+            'generations': 20000,
+            'selection_scheme': ROULETTE,
+            'crossover_type': MULTI_POINT,
             'n_elites': 90,
             'thrust_value': 870}

@@ -111,12 +111,8 @@ class Chromosome:
         # calculate thrust
         self.thrust = (m.pow(mv['a'], mv['b']) + m.log(mv['y'])) / (mv['d'] + m.pow(mv['t'], 3))
 
-        delta_thrust = self.perfect_thrust - self.thrust
-
-        if self.thrust == self.perfect_thrust:
-            self.fitness_val = float('inf')
-        else:
-            self.fitness_val = 1 / delta_thrust  # lower delta thrust gives higher fitness value
+        # calculate fitness. Closer to 0 is better
+        self.fitness_val = abs(self.perfect_thrust - self.thrust)
 
     def mutate(self) -> None:
         """
