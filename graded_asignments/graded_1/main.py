@@ -15,7 +15,7 @@ if __name__ == '__main__':
                     generations=inp['generations'],
                     selection_scheme=inp['selection_scheme'],
                     crossover_type=inp['crossover_type'],
-                    n_elitism_rounds=inp['n_elitism_rounds'],
+                    n_elites=inp['n_elites'],
                     thrust_value=inp['thrust_value'])
             ga.crossbreed()
             print("\n\nRESULTS")

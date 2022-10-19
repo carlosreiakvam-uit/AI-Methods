@@ -1,12 +1,16 @@
 import random
+import numpy as np
 from graded_asignments.graded_1.Chromosome import Chromosome
 from constants import *
 
 
 class GA:
     def __init__(self, pop_size, mutate_treshold, generations, selection_scheme,
-                 crossover_type, n_elitism_rounds=20, thrust_value=870):
+                 crossover_type, n_elites=None, thrust_value=870):
+
         self.population = []
+        self.feature_keys = ['a', 'b', 'y', 'd', 't']
+        self.n_features = 5
 
         # settings
         self.thrust_value = thrust_value
@@ -16,11 +20,11 @@ class GA:
         self.selection_scheme = selection_scheme
         self.crossover_type = crossover_type
 
-        # set elitism range
-        if n_elitism_rounds < self.pop_size:
-            self.n_elitism_rounds = n_elitism_rounds
+        # set n elites range
+        if n_elites is None or n_elites > self.pop_size:
+            self.n_elites = int(self.pop_size * 0.5)
         else:
-            self.n_elitism_rounds = pop_size - 1
+            self.n_elites = n_elites
 
         # create initial population
         self.create_initial_population()
@@ -30,26 +34,95 @@ class GA:
             self.population.append(Chromosome(thrust_value=self.thrust_value))
         self.population.sort(key=lambda x: x.fitness_val, reverse=True)  # sort population from best to worst
 
+    def arithmetic_crossover(self, ind1, ind2):
+        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+        for i, k in enumerate(self.feature_keys):
+            f1_int = int(ind1.features[k]['val'], 2)
+            f2_int = int(ind2.features[k]['val'], 2)
+            mean = int((f1_int + f2_int) / 2)
+            new_features[k] = format(mean, 'b')
+        return new_features
+
+    def crossover(self, ind1: Chromosome, ind2: Chromosome, crossover_type) -> dict:
+        """
+        - **Crossing two chromosome by using a crossbreed-pattern**.\n
+        - The crossbreed-pattern consists of 0's and 1's.\n
+        - For a list of bits representing a feature value:\n
+          - if crossbreed pattern = 0: use first chromosome's bit \n
+          - if crossbreed pattern = 1: use second chromosome's bit\n
+        :param ind1: parent 1 Chromosome
+        :param ind2: parent 2 Chromosome
+        :param crossover_type: 0= Arithmetic crossover, 1 = single point crossover, 2 = multi point crossover, 3 = uniform crossover
+        :return:
+        """
+        if crossover_type == ARITHMETIC:
+            return self.arithmetic_crossover(ind1, ind2)
+        elif crossover_type == SINGLE_POINT:
+            crossbreed_pattern = [0, 0, 0, 1, 1]
+        elif crossover_type == MULTI_POINT:
+            crossbreed_pattern = [0, 1, 0, 1, 1]
+        else:  # UNIFORM
+            crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
+
+        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
+        for i, k in enumerate(self.feature_keys):
+            if bool(crossbreed_pattern[i]):
+                new_features[k] = ind1.features[k]['val']
+            else:
+                new_features[k] = ind2.features[k]['val']
+        return new_features
+
+    def elitism(self):
+        pass
+
+    def roulette(self):
+        lowest_fitness = 1 / self.population[-1].fitness_val
+        highest_fitness = 1 / self.population[0].fitness_val
+        sum_fitness = 0
+        for p in self.population:
+            sum_fitness += 1 / p.fitness_val
+        # fitness_invert = 1/sum_fitness
+        print(sum_fitness)
+
+        # for i in range(int(self.pop_size * 0.2)):
+        #     ind_copy = self.population[i]
+        #     self.population.append(ind_copy)
+        #     if i > 1000:
+        #         print("weehow")
+        #         break  # safety brake
+        # random.shuffle(self.population)
+
     def crossbreed(self, print_along=False):
         for i in range(self.generations):
-            for j in range(1, self.n_elitism_rounds):
+
+            population_range = self.n_elites  # TODO: denne er fast nå...
+            # if self.selection_scheme == ROULETTE:
+            #     self.roulette()
+            # population_range = self.n_elites
+            # elif self.selection_scheme == ELITISM:
+            #     population_range = self.n_elites
+
+            # Crossbreed
+            for j in range(1, population_range):
                 ind_1 = self.population[j - 1]
                 ind_2 = self.population[j + 1]
-                crossover_features = ind_1.crossover(ind_2, crossover_type=self.crossover_type)
-                ind_new = Chromosome(init_features=crossover_features, thrust_value=self.thrust_value)
+                crossover_features = self.crossover(ind_1, ind_2, crossover_type=self.crossover_type)
+                ind_offspring = Chromosome(init_features=crossover_features, thrust_value=self.thrust_value)
 
+                # mutate by chance
                 if random.random() < self.mutate_threshold:
-                    ind_new.mutate()
+                    ind_offspring.mutate()
 
-                if self.selection_scheme == ELITISM:
-                    self.population[len(self.population) - j] = ind_new  # replace least fit individual
+                # replace least fit individual
+                self.population[len(self.population) - j] = ind_offspring  # replace least fit individual
 
-            # sort population from best to worst
-            self.population.sort(key=lambda x: x.fitness_val, reverse=True)
+                # sort population
+                self.population.sort(key=lambda x: x.fitness_val, reverse=True)
+
             self.print_loading_dots(i)
 
-            if print_along:
-                print(self.population[0])
+        if print_along:
+            print(self.population[0])
 
     def print_population(self, head: float('inf')):
         print("\n\nPOPULATION")

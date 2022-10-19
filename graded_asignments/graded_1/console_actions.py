@@ -41,7 +41,7 @@ def get_user_input():
             'generations': generations,
             'selection_scheme': selection_scheme,
             'crossover_type': MULTI_POINT,
-            'n_elitism_rounds': 90,
+            'n_elites': 90,
             'thrust_value': thrust_value}
 
 
@@ -50,15 +50,15 @@ def demo_parameters() -> dict:
     print("mutation rate:\t\t\t0.2")
     print("n generations:\t\t\t1000")
     print("selection scheme:\t\telitism")
-    print("n elitist gens:\t\t\t90")
-    print("crossover type:\t\t\tmulti point")
+    print("n elites:\t\t\t\t90")
+    print("crossover type:\t\t\tarithmetic")
     print("seeking thrust value:\t870")
     print("\nRunning demo algorithm...", end='')
 
     return {'pop_size': 100,
             'mutation_threshold': 0.2,
-            'generations': 1000,
+            'generations': 10000,
             'selection_scheme': ELITISM,
-            'crossover_type': MULTI_POINT,
-            'n_elitism_rounds': 90,
+            'crossover_type': ARITHMETIC,
+            'n_elites': 90,
             'thrust_value': 870}

@@ -118,37 +118,6 @@ class Chromosome:
         else:
             self.fitness_val = 1 / delta_thrust  # lower delta thrust gives higher fitness value
 
-    # TODO: Move over to genetic algorithm class
-    def crossover(self, other, crossover_type) -> dict:
-        """
-        - **Crossing two chromosome by using a crossbreed-pattern**.\n
-        - The crossbreed-pattern consists of 0's and 1's.\n
-        - For a list of bits representing a feature value:\n
-          - if crossbreed pattern = 0: use first chromosome's bit \n
-          - if crossbreed pattern = 1: use second chromosome's bit\n
-        :param other: Another Chromosome
-        :param crossover_type: 0= Arithmetic crossover, 1 = single point crossover, 2 = multi point crossover, 3 = uniform crossover
-        :return:
-        """
-        if crossover_type == ARITHMETIC:
-            crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
-        elif crossover_type == SINGLE_POINT:
-            crossbreed_pattern = [0, 0, 0, 1, 1]
-        elif crossover_type == MULTI_POINT:
-            crossbreed_pattern = [0, 1, 0, 1, 1]
-        else:  # UNIFORM
-            crossbreed_pattern = list(np.random.randint(0, 2, self.n_features))
-
-        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        for i, k in enumerate(self.feature_keys):
-            if bool(crossbreed_pattern[i]):
-                new_features[k] = self.features[k]['val']
-            else:
-                new_features[k] = other.features[k]['val']
-        return new_features
-
-    # noinspection PyUnboundLocalVariable
-    # TODO: Move over to genetic algorithm class
     def mutate(self) -> None:
         """
         - each features bit-values have a 50% chance of being mutated
