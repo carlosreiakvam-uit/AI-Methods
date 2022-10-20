@@ -20,7 +20,7 @@ class GA:
         self.thrust_value = thrust_value
         self.pop_size = pop_size
         self.mutate_threshold = mutate_threshold
-        self.generations = generations
+        self.n_gens = generations
         self.selection_scheme = selection_scheme
         self.crossover_type = crossover_type
 
@@ -40,7 +40,7 @@ class GA:
 
     # noinspection PyUnboundLocalVariable
     def run(self, print_along=False):
-        for i in range(self.generations):
+        for i in range(self.n_gens):
             # iterate over population
             for j in range(1, self.n_elites):
 
@@ -54,29 +54,31 @@ class GA:
 
                 # CROSSBREEDING
                 crossover_features = self.crossover(parent_1, parent_2, crossover_type=self.crossover_type)
-                ind_offspring = Chromosome(init_features=crossover_features, thrust_value=self.thrust_value)
+                offspring = Chromosome(init_features=crossover_features, thrust_value=self.thrust_value)
 
                 # MUTATION
-                if random.random() < self.mutate_threshold:
+                if random.random() <= self.mutate_threshold:
                     if self.low_level_mutation:
-                        ind_offspring.low_level_mutation()
+                        offspring.low_level_mutation()
                     else:
-                        ind_offspring.high_level_mutation()
+                        offspring.high_level_mutation()
 
                 # REPLACEMENT
-                self.population[len(self.population) - j] = ind_offspring  # replace least fit individual
+                self.population[len(self.population) - j] = offspring  # replace least fit individual
 
-                # sort population
-                self.population.sort(key=lambda x: x.fitness_val)
 
-                if self.term_avg:
-                    if self.average_fitness() <= self.avg_fitness_threshold:
-                        print(f"Stopped due to average fitness below {self.avg_fitness_threshold}")
-                        return
+            # sort population
+            self.population.sort(key=lambda x: x.fitness_val)
+
+            if self.term_avg:
+                if self.calc_average_fitness() <= self.avg_fitness_threshold:
+                    print(f"Stopped due to average fitness below {self.avg_fitness_threshold}")
+                    return
+
             if print_along:
                 print(self.population[0])
 
-    def average_fitness(self):
+    def calc_average_fitness(self):
         sum = 0
         for i in self.population:
             sum += i.fitness_val
@@ -92,7 +94,7 @@ class GA:
         return new_features
 
     def multipoint_crossover(self):
-        n_ones = random.randrange(1, self.n_features)
+        n_ones = random.randrange(2, self.n_features)
         ones = np.ones(n_ones, dtype=np.int8).tolist()
         zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
         pattern = ones + zeros
@@ -103,7 +105,11 @@ class GA:
         n_ones = random.randint(1, self.n_features - 1)
         ones = np.ones(n_ones, dtype=np.int8).tolist()
         zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
-        pattern = ones + zeros
+        if random.randrange(0,1) == 1:
+            pattern = ones + zeros
+        else:
+            pattern = zeros + ones
+
         return pattern
 
     def generate_features_from_crossover_pattern(self, pattern, parent1, parent2):
