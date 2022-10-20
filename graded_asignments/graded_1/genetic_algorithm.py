@@ -88,11 +88,10 @@ class GA:
         return pattern
 
     def singlepoint_crossover(self):
-        n_ones = random.randint(0, self.n_features)
+        n_ones = random.randint(1, self.n_features-1)
         ones = np.ones(n_ones, dtype=np.int8).tolist()
         zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
         pattern = ones + zeros
-        random.shuffle(pattern)
         return pattern
 
     def generate_features_from_crossover_pattern(self, pattern, parent1, parent2):
@@ -126,9 +125,10 @@ class GA:
     def roulette(self):
         best_fitness = self.population[0].fitness_val  # closest to 0
         worst_fitness = self.population[-1].fitness_val  # furthest from 0
+        diff = worst_fitness - best_fitness
         sum_fitness = 0
         try:
-            random_roulette_n = random.randrange(int(best_fitness), int(worst_fitness))
+            random_roulette_n = random.randrange(best_fitness, worst_fitness)
         except ValueError:
             random_roulette_n = random.randrange(0, 1)
         for p in self.population:
