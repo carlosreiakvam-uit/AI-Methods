@@ -1,13 +1,16 @@
 import random
 import numpy as np
+import math
 from graded_asignments.graded_1.Chromosome import Chromosome
 from constants import *
 
 
 class GA:
-    def __init__(self, pop_size, mutate_treshold, generations, selection_scheme,
-                 crossover_type, n_elites=None, thrust_value=870, low_level_mutation=True):
+    def __init__(self, pop_size, mutate_threshold, generations, selection_scheme,
+                 crossover_type, n_elites=None, thrust_value=870, low_level_mutation=True, term_avg=False):
 
+        self.term_avg = term_avg
+        self.avg_fitness_threshold = 10
         self.low_level_mutation = low_level_mutation
         self.population = []
         self.feature_keys = ['a', 'b', 'y', 'd', 't']
@@ -16,7 +19,7 @@ class GA:
         # settings
         self.thrust_value = thrust_value
         self.pop_size = pop_size
-        self.mutate_threshold = mutate_treshold
+        self.mutate_threshold = mutate_threshold
         self.generations = generations
         self.selection_scheme = selection_scheme
         self.crossover_type = crossover_type
@@ -28,17 +31,16 @@ class GA:
             self.n_elites = n_elites
 
         # create initial population
-        self.create_initial_population()
+        self.create_initial_population(self.pop_size)
 
-    def create_initial_population(self):
-        for i in range(self.pop_size):
+    def create_initial_population(self, pop_size):
+        for i in range(pop_size):
             self.population.append(Chromosome(thrust_value=self.thrust_value))
         self.population.sort(key=lambda x: x.fitness_val)  # sort population from best to worst
 
     # noinspection PyUnboundLocalVariable
     def run(self, print_along=False):
         for i in range(self.generations):
-
             # iterate over population
             for j in range(1, self.n_elites):
 
@@ -67,8 +69,18 @@ class GA:
                 # sort population
                 self.population.sort(key=lambda x: x.fitness_val)
 
-        if print_along:
-            print(self.population[0])
+                if self.term_avg:
+                    if self.average_fitness() <= self.avg_fitness_threshold:
+                        print(f"Stopped due to average fitness below {self.avg_fitness_threshold}")
+                        return
+            if print_along:
+                print(self.population[0])
+
+    def average_fitness(self):
+        sum = 0
+        for i in self.population:
+            sum += i.fitness_val
+        return sum / len(self.population)
 
     def arithmetic_crossover(self, parent1, parent2):
         new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
@@ -88,7 +100,7 @@ class GA:
         return pattern
 
     def singlepoint_crossover(self):
-        n_ones = random.randint(1, self.n_features-1)
+        n_ones = random.randint(1, self.n_features - 1)
         ones = np.ones(n_ones, dtype=np.int8).tolist()
         zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
         pattern = ones + zeros
@@ -123,14 +135,12 @@ class GA:
             return self.generate_features_from_crossover_pattern(pattern, parent1, parent2)
 
     def roulette(self):
+        # fitness range from 0 to a high order, where 0 is best
         best_fitness = self.population[0].fitness_val  # closest to 0
         worst_fitness = self.population[-1].fitness_val  # furthest from 0
-        diff = worst_fitness - best_fitness
         sum_fitness = 0
-        try:
-            random_roulette_n = random.randrange(best_fitness, worst_fitness)
-        except ValueError:
-            random_roulette_n = random.randrange(0, 1)
+
+        random_roulette_n = best_fitness + math.log2(random.random()) * -1 * (worst_fitness - best_fitness)
         for p in self.population:
             sum_fitness += p.fitness_val
             if sum_fitness > random_roulette_n:
