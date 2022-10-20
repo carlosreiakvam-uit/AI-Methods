@@ -17,7 +17,7 @@ if __name__ == '__main__':
                     crossover_type=inp['crossover_type'],
                     n_elites=inp['n_elites'],
                     thrust_value=inp['thrust_value'])
-            ga.crossbreed()
+            ga.run()
             print("\n\nRESULTS")
             print(ga.population[0])
             print("\n(enter to continue)", end='')

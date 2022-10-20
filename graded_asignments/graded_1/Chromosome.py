@@ -92,9 +92,9 @@ class Chromosome:
         """
         mapped = {'a': int(self.features['a']['val'], 2),
                   'b': int(self.features['b']['val'], 2),
-                  'y': int(self.features['y']['val'], 2) * 0.01,
+                  'y': int(self.features['y']['val'], 2),
                   'd': int(self.features['d']['val'], 2),
-                  't': int(self.features['t']['val'], 2) * 0.1}
+                  't': int(self.features['t']['val'], 2)}
         if round_decimals:
             for k, v in mapped.items():
                 mapped[k] = round(v, 2)
@@ -108,18 +108,27 @@ class Chromosome:
         # get mapped features in float format
         mv = self.get_mapped()
 
+        # correct decimals
+        y = mv['y'] * 0.01
+        t = mv['t'] * 0.1
+
         # calculate thrust
-        self.thrust = (m.pow(mv['a'], mv['b']) + m.log(mv['y'])) / (mv['d'] + m.pow(mv['t'], 3))
+        self.thrust = (m.pow(mv['a'], mv['b']) + m.log(y)) / (mv['d'] + m.pow(t, 3))
 
         # calculate fitness. Closer to 0 is better
         self.fitness_val = abs(self.perfect_thrust - self.thrust)
 
     def high_level_mutation(self) -> None:
-        pass
+        fv = self.get_mapped()
+        self.set_feature('a', fv['a'] + random.randrange(-2, 2))
+        self.set_feature('b', fv['b'] + random.randrange(-1, 1))
+        self.set_feature('y', fv['y'] + random.randrange(-1, 1))
+        self.set_feature('d', fv['d'] + random.randrange(-10, 10))
+        self.set_feature('t', fv['t'] + random.randrange(-1, 1))
 
     def low_level_mutation(self) -> None:
         """
-        - each features bit-values have a 50% chance of being mutated
+        - each features bit-values have a 1/bit_length chance of being mutated
         :return:None
         """
         for k, _ in self.features.items():
@@ -148,6 +157,6 @@ class Chromosome:
                    f'fit: {self.fitness_val}\t'
                    f"a:{mv['a']}, "
                    f"b:{mv['b']}, "
-                   f"y:{mv['y']}, "
+                   f"y:{mv['y'] * 0.01}, "
                    f"d:{mv['d']}, "
-                   f"t:{mv['t']}")
+                   f"t:{mv['t'] * 0.1}")

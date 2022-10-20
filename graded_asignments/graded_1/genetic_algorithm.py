@@ -36,7 +36,7 @@ class GA:
         self.population.sort(key=lambda x: x.fitness_val)  # sort population from best to worst
 
     # noinspection PyUnboundLocalVariable
-    def crossbreed(self, print_along=False):
+    def run(self, print_along=False):
         for i in range(self.generations):
 
             # iterate over population
