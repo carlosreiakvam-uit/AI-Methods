@@ -79,7 +79,7 @@ class GA:
             new_features[k] = format(mean, 'b')
         return new_features
 
-    def multipoint_crossover(self, parent1, parent2):
+    def multipoint_crossover(self):
         n_ones = random.randrange(1, self.n_features)
         ones = np.ones(n_ones, dtype=np.int8).tolist()
         zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
@@ -87,9 +87,8 @@ class GA:
         random.shuffle(pattern)
         return pattern
 
-    def singlepoint_crossover(self, parent1, parent2):
-        new_features = {'a': None, 'b': None, 'y': None, 'd': None, 't': None}
-        n_ones = random.randint(self.n_features)
+    def singlepoint_crossover(self):
+        n_ones = random.randint(0, self.n_features)
         ones = np.ones(n_ones, dtype=np.int8).tolist()
         zeros = np.zeros(self.n_features - n_ones, dtype=np.int8).tolist()
         pattern = ones + zeros
@@ -115,10 +114,10 @@ class GA:
         if crossover_type == ARITHMETIC:
             return self.arithmetic_crossover(parent1, parent2)
         elif crossover_type == SINGLE_POINT:
-            pattern = self.singlepoint_crossover(parent1, parent2)
+            pattern = self.singlepoint_crossover()
             return self.generate_features_from_crossover_pattern(pattern, parent1, parent2)
         elif crossover_type == MULTI_POINT:
-            pattern = self.multipoint_crossover(parent1, parent2)
+            pattern = self.multipoint_crossover()
             return self.generate_features_from_crossover_pattern(pattern, parent1, parent2)
         else:  # UNIFORM
             pattern = list(np.random.randint(0, 2, self.n_features))
