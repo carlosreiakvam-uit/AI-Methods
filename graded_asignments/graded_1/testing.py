@@ -7,12 +7,35 @@ mutate_threshold = 0.3
 generations = 500
 
 
-def run(n_tests, pop_size, mutate_threshold, generations):
+def run_n_plot(n_tests, pop_size, mutate_threshold, generations, low_level_mutation):
     print("Running", end='')
-    elitism = run_elitism(n_tests, pop_size, mutate_threshold, generations)
-    roulette = run_roulette(n_tests, pop_size, mutate_threshold, generations)
-    plot_ga(elitism, 'Elitist selection', 'elitism.png')
+    elitist = run_elitism(n_tests, pop_size, mutate_threshold, generations, low_level_mutation)
+    roulette = run_roulette(n_tests, pop_size, mutate_threshold, generations, low_level_mutation)
+    plot_ga(elitist, 'Elitist selection', 'elitist.png')
     plot_ga(roulette, 'Roulette selection', 'roulette.png')
+    return elitist, roulette
+
+
+def calc_avg(data):
+    sum = 0
+    for val in data['thrust']:
+            sum += val
+    return sum / len(data['thrust'])
+
+
+def average_run(n_tests, pop_size, mutate_threshold, generations, low_level_mutation):
+    elit_arit, elit_sp, elit_mp = run_elitism(n_tests, pop_size, mutate_threshold, generations, low_level_mutation)
+    rou_arit, rou_sp, rou_mp = run_roulette(n_tests, pop_size, mutate_threshold, generations, low_level_mutation)
+
+    averages = {
+        "avg_elit_arit": calc_avg(elit_arit),
+        "avg_elit_sp": calc_avg(elit_sp),
+        "avg_elit_mp": calc_avg(elit_mp),
+        "avg_rou_arit": calc_avg(rou_arit),
+        "avg_rou_sp": calc_avg(rou_sp),
+        "avg_rou_mp": calc_avg(rou_mp)}
+
+    return averages
 
 
 def run_test(name, n_tests, pop_size=pop_size, mutate_threshold=mutate_threshold, generations=generations,
@@ -40,26 +63,30 @@ def run_test(name, n_tests, pop_size=pop_size, mutate_threshold=mutate_threshold
     return {'thrust': thrust_lst, 'fitness': fitness_lst, 'name': name}
 
 
-def run_elitism(n_tests, pop_size, mutate_threshold, generations):
+def run_elitism(n_tests, pop_size, mutate_threshold, generations, low_level_mutation):
     n_tests = n_tests
-    elit_arit = run_test('elitism, ar', n_tests, selection_scheme=ELITISM, crossover_type=ARITHMETIC, pop_size=pop_size,
-                         mutate_threshold=mutate_threshold, generations=generations)
-    elit_sp = run_test('elitism, sp', n_tests, selection_scheme=ELITISM, crossover_type=SINGLE_POINT, pop_size=pop_size,
-                       mutate_threshold=mutate_threshold, generations=generations)
-    elit_mp = run_test('elitism, mp', n_tests, selection_scheme=ELITISM, crossover_type=MULTI_POINT, pop_size=pop_size,
-                       mutate_threshold=mutate_threshold, generations=generations)
+    elit_arit = run_test('elitist, ar', n_tests, selection_scheme=ELITISM, crossover_type=ARITHMETIC, pop_size=pop_size,
+                         mutate_threshold=mutate_threshold, generations=generations,
+                         low_level_mutation=low_level_mutation)
+    elit_sp = run_test('elitist, sp', n_tests, selection_scheme=ELITISM, crossover_type=SINGLE_POINT, pop_size=pop_size,
+                       mutate_threshold=mutate_threshold, generations=generations,
+                       low_level_mutation=low_level_mutation)
+    elit_mp = run_test('elitist, mp', n_tests, selection_scheme=ELITISM, crossover_type=MULTI_POINT, pop_size=pop_size,
+                       mutate_threshold=mutate_threshold, generations=generations,
+                       low_level_mutation=low_level_mutation)
     return [elit_arit, elit_sp, elit_mp]
 
 
-def run_roulette(n_tests, pop_size, mutate_threshold, generations):
+def run_roulette(n_tests, pop_size, mutate_threshold, generations, low_level_mutation):
     rou_arit = run_test('roulette, ar', n_tests, selection_scheme=ROULETTE, crossover_type=ARITHMETIC,
                         pop_size=pop_size,
-                        mutate_threshold=mutate_threshold, generations=generations)
+                        mutate_threshold=mutate_threshold, generations=generations,
+                        low_level_mutation=low_level_mutation)
     rou_sp = run_test('roulette, sp', n_tests, selection_scheme=ROULETTE, crossover_type=SINGLE_POINT,
                       pop_size=pop_size,
-                      mutate_threshold=mutate_threshold, generations=generations)
+                      mutate_threshold=mutate_threshold, generations=generations, low_level_mutation=low_level_mutation)
     rou_mp = run_test('roulette, mp', n_tests, selection_scheme=ROULETTE, crossover_type=MULTI_POINT, pop_size=pop_size,
-                      mutate_threshold=mutate_threshold, generations=generations)
+                      mutate_threshold=mutate_threshold, generations=generations, low_level_mutation=low_level_mutation)
     return [rou_arit, rou_sp, rou_mp]
 
 
@@ -71,6 +98,6 @@ def plot_ga(data, title, filename):
     plt.ylabel('thrust')
     plt.xlabel('separate runs of genetic algorithm')
     plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
-    plt.savefig(filename)
+    plt.savefig('./plots/' + filename)
     plt.show()
     plt.close()
