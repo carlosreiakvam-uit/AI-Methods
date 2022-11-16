@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import math
-from course.graded_asignments.graded_1.chromosome import Chromosome
+from graded_asignments.graded_1.chromosome import Chromosome
 from constants import *
 
 
