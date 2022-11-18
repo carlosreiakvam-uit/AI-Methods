@@ -81,8 +81,8 @@ def pick_random_samples_from_data(data):
 
 if __name__ == '__main__':
     # import data
-    pd_2021 = read_data('data_2021.csv')
-    pd_2022 = read_data('data_2022.csv')
+    pd_2021 = read_data('data/data_2021.csv')
+    pd_2022 = read_data('data/data_2022.csv')
     np_2021 = pd_2021['Demand'].to_numpy()
     np_2022 = pd_2022['Demand'].to_numpy()
     # n_remaining_days = len(np_2021) - len(np_2022)
