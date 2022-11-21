@@ -1,20 +1,16 @@
+import math
+import random
+
 from sklearn.tree import DecisionTreeRegressor
 
 
-class Regressor:
+class Regressor(DecisionTreeRegressor):
     def __init__(self):
+        super().__init__()
         self.tree = self.get_randomly_initiated_tree()
-        pass
 
     def get_randomly_initiated_tree(self):
-        # legg in random variables etterhvert
-        model = DecisionTreeRegressor(random_state=0)
+        model = DecisionTreeRegressor()
+        model.criterion = random.sample(["squared_error", "friedman_mse", "absolute_error", "poisson"], 1)
+        model.splitter = random.sample(['best', 'random'], 1)
         return model
-
-    def slide_dataset(self, data, window_size=4):
-        x, y = [], []
-        for i in range(len(data) - window_size):
-            x.append(data[i:i + window_size])
-            y.append(data[i + window_size])
-        return x, y
-

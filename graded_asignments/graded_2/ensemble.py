@@ -1,29 +1,31 @@
-import random
-
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from graded_asignments.graded_2.regressor import Regressor
+from graded_asignments.graded_2.utils import *
 from sklearn.tree import DecisionTreeRegressor
 
 
-class Ensemble:
-    def __init__(self):
-        forest_size = 200
-        self.forest = self.random_forest(forest_size)
+# criterion = random.sample(["squared_error", "friedman_mse", "absolute_error", "poisson"], 1),
+# splitter = random.sample(['best', 'random'], 1))
 
-    def random_forest(self, size) -> list:
+class Ensemble:
+    def __init__(self, forest_size=200):
+        self.forest = self.create_forest(forest_size)
+
+    def create_forest(self, forest_size):
         forest = []
-        for i in range(size):
-            regressor = Regressor()
-            forest.append(regressor.tree)
+        for i in range(forest_size):
+            tree = DecisionTreeRegressor(
+                criterion=random.choice(["squared_error", "friedman_mse", "absolute_error", "poisson"]),
+                splitter=random.choice(['best', 'random'])
+            )
+            forest.append(tree)
         return forest
 
     def train_forest(self, train_data, window_size=10):
         print("training...", end='')
         for tree in self.forest:
             bootstrap_data = self.pick_random_samples_from_data(train_data)
-            x, y = tree.slide_dataset(bootstrap_data, window_size)
+            x, y = slide_dataset(bootstrap_data, window_size)
             tree.fit(x, y)
             print('.', end='')
         print('Finished!', end='')
@@ -40,7 +42,6 @@ class Ensemble:
         for window in x:
             current_predictions = []
             for tree in self.forest:
-                pred = [0 for i in range(window_size)]
                 pred = tree.predict([window])
                 current_predictions.append(pred[0])
             avg = sum(current_predictions) / len(current_predictions)
@@ -53,3 +54,17 @@ class Ensemble:
         pd_ensemble_pred.plot(grid=True, rot=90, ax=ax1)
         ax1.legend(['demand 2021', 'prediction'])
         plt.show()
+
+# if __name__ == '__main__':
+#     pd_2021 = pd.read_csv('data/data_2021.csv')
+#     pd_2022 = pd.read_csv('data/data_2022.csv')
+#     np_2021 = pd_2021['Demand'].to_numpy()
+#     np_2022 = pd_2022['Demand'].to_numpy()
+#     ws = 10
+#
+#     x, y = make_dataset(np_2021, ws)
+#
+#     test_data, train_data = split_all_data([pd_2021, pd_2022])
+#
+#     ensemble = Ensemble()
+#     ensemble.train_forest(train_data, window_size=ws)

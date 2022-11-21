@@ -23,4 +23,9 @@ def make_dataset(data, window_size=4):
     return x, y
 
 
-
+def slide_dataset(data, window_size=4):
+    x, y = [], []
+    for i in range(len(data) - window_size):
+        x.append(data[i:i + window_size])
+        y.append(data[i + window_size])
+    return x, y
