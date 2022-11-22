@@ -1,8 +1,13 @@
 import pandas as pd
 import random
+import matplotlib.pyplot as plt
 
 
-def split_all_data(datasets):
+def split(datasets):
+    """
+    :param datasets: list of datasets to be split
+    :return: lists of test_data and train_data
+    """
     test_data = []
     train_data = []
 
@@ -15,7 +20,7 @@ def split_all_data(datasets):
     return test_data, train_data
 
 
-def make_dataset(data, window_size=4):
+def slide(data, window_size=4):
     x, y = [], []
     for i in range(len(data) - window_size):
         x.append(data[i:i + window_size])
@@ -23,9 +28,17 @@ def make_dataset(data, window_size=4):
     return x, y
 
 
-def slide_dataset(data, window_size=4):
-    x, y = [], []
-    for i in range(len(data) - window_size):
-        x.append(data[i:i + window_size])
-        y.append(data[i + window_size])
-    return x, y
+def pick_random_samples_from_data(data) -> list:
+    samples = []
+    for sample in data:
+        if random.random() < 0.5:
+            samples.append(sample)
+    return samples
+
+
+def plot_comparison( training, prediction) -> None:
+    pd_ensemble_pred = pd.DataFrame(prediction)
+    ax1 = training.plot(y='Demand')
+    pd_ensemble_pred.plot(grid=True, rot=90, ax=ax1)
+    ax1.legend(['demand 2021', 'prediction'])
+    plt.show()
