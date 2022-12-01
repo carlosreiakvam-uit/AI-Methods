@@ -28,15 +28,7 @@ def slide(data, window_size=4):
     return x, y
 
 
-def pick_random_samples_from_data(data) -> list:
-    samples = []
-    for sample in data:
-        if random.random() < 0.5:
-            samples.append(sample)
-    return samples
-
-
-def plot_comparison( training, prediction) -> None:
+def plot_comparison(training, prediction) -> None:
     pd_ensemble_pred = pd.DataFrame(prediction)
     ax1 = training.plot(y='Demand')
     pd_ensemble_pred.plot(grid=True, rot=90, ax=ax1)
