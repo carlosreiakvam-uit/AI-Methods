@@ -30,7 +30,21 @@ class Ensemble:
             complete_pred.append(avg)
         return complete_pred
 
-    def train(self, train_data, window_size):
+    def predict_unseen(self, initial_window, n_predictions) -> list:
+        complete_pred = []
+        window = initial_window
+        for i in range(n_predictions):
+            current_predictions = []
+            for model in self.forest:
+                pred = model.predict([window])
+                current_predictions.append(pred[0])
+            avg_pred = sum(current_predictions) / len(current_predictions)
+            window = window[1:]
+            window.append(avg_pred)
+            complete_pred.append(avg_pred)
+        return complete_pred
+
+    def train(self, train_data, window_size) -> None:
         print("training...", end='')
         for tree in self.forest:
             bootstrap_data = self.bootstrap(train_data)
